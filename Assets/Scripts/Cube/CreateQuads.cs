@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class CreateQuads : MonoBehaviour
 {
-    public Material cubeMat;
+    [SerializeField] private Material cubeMat;
+    [SerializeField] private BlockType blockType;
+    [SerializeField] private BlockTypeConfig blockTypeConfig;
 
     private enum CubSide
     {
@@ -16,6 +18,24 @@ public class CreateQuads : MonoBehaviour
         Back,
         Front
     }
+    private enum BlockType
+    {
+        Grass,
+        Dirt,
+        Stone,
+        Lava,
+        Snow
+    }
+    
+    Vector2[,] blockUVs = { 
+        /*Grass Top*/ {new Vector2( 0.125f, 0.375f ), new Vector2( 0.1875f, 0.375f),   new Vector2( 0.125f, 0.4375f ),new Vector2( 0.1875f, 0.4375f )},
+        /*Grass Side*/{new Vector2( 0.1875f, 0.9375f ), new Vector2( 0.25f, 0.9375f),  new Vector2( 0.1875f, 1.0f ),new Vector2( 0.25f, 1.0f )},
+        /*Dirt*/	  {new Vector2( 0.125f, 0.9375f ), new Vector2( 0.1875f, 0.9375f), new Vector2( 0.125f, 1.0f ),new Vector2( 0.1875f, 1.0f )},
+        /*Stone*/	  {new Vector2( 0, 0.875f ), new Vector2( 0.0625f, 0.875f),  new Vector2( 0, 0.9375f ),new Vector2( 0.0625f, 0.9375f )},
+        /*Lava*/	  {new Vector2( 0.875f, 0.0625f ), new Vector2( 0.9375f, 0.0625f), new Vector2( 0.875f, 0.125f ),new Vector2( 0.9375f, 0.125f )},
+        /*Snow Top*/	  {new Vector2( 0.125f, 0.6875f ), new Vector2( 0.1875f, 0.6875f), new Vector2( 0.125f, 0.75f ),new Vector2( 0.1875f, 0.75f )},
+        /*Snow Side*/	  {new Vector2( 0.25f, 0.6875f ), new Vector2( 0.3125f, 0.6875f), new Vector2( 0.25f, 0.75f ),new Vector2( 0.3125f, 0.75f )}
+    };
 
     private void Start()
     {
@@ -50,10 +70,69 @@ public class CreateQuads : MonoBehaviour
         Vector3 p7 = new Vector3(-0.5f, 0.5f, -0.5f);
 
         //all possible UVs
-        Vector2 uv00 = new Vector2(0f, 0f);
-        Vector2 uv10 = new Vector2(1f, 0f);
-        Vector2 uv01 = new Vector2(0f, 1f);
-        Vector2 uv11 = new Vector2(1f, 1f);
+        Vector2 uv00;
+        Vector2 uv10;
+        Vector2 uv01;
+        Vector2 uv11;
+
+        if (blockType == BlockType.Grass)
+        {
+            if (side == CubSide.Top)
+            {
+                uv00 = blockUVs[0, 0];
+                uv10 = blockUVs[0, 1];
+                uv01 = blockUVs[0, 2];
+                uv11 = blockUVs[0, 3];
+            }
+            else if (side == CubSide.Bottom)
+            {
+                // +1 because in the matrix we have two grass, so we need to get the dirt index +1
+                uv00 = blockUVs[(int)BlockType.Dirt + 1, 0];
+                uv10 = blockUVs[(int)BlockType.Dirt + 1, 1];
+                uv01 = blockUVs[(int)BlockType.Dirt + 1, 2];
+                uv11 = blockUVs[(int)BlockType.Dirt + 1, 3];
+            }
+            else 
+            {
+                uv00 = blockUVs[(int)blockType + 1, 0];
+                uv10 = blockUVs[(int)blockType + 1, 1];
+                uv01 = blockUVs[(int)blockType + 1, 2];
+                uv11 = blockUVs[(int)blockType + 1, 3];
+            }
+        }else if (blockType == BlockType.Snow)
+        {
+            // Order set by unity texture UVs
+            if (side == CubSide.Top)
+            {
+                uv01 = blockTypeConfig.topTexture.uv[0];
+                uv10 = blockTypeConfig.topTexture.uv[1];
+                uv11 = blockTypeConfig.topTexture.uv[2];
+                uv00 = blockTypeConfig.topTexture.uv[3];
+            }
+            else if (side == CubSide.Bottom)
+            {
+                uv01 = blockTypeConfig.bottomTexture.uv[0];
+                uv10 = blockTypeConfig.bottomTexture.uv[1];
+                uv11 = blockTypeConfig.bottomTexture.uv[2];
+                uv00 = blockTypeConfig.bottomTexture.uv[3];
+            }
+            else 
+            {
+                uv01 = blockTypeConfig.leftTexture.uv[0];
+                uv10 = blockTypeConfig.leftTexture.uv[1];
+                uv11 = blockTypeConfig.leftTexture.uv[2];
+                uv00 = blockTypeConfig.leftTexture.uv[3];
+            }
+        }
+        else
+        {
+            uv00 = blockUVs[(int)blockType + 1, 0];
+            uv10 = blockUVs[(int)blockType + 1, 1];
+            uv01 = blockUVs[(int)blockType + 1, 2];
+            uv11 = blockUVs[(int)blockType + 1, 3];
+        }
+        
+
 
         //The order of vertices is important to generate the triangles triangles = new int[] { 3, 1, 0, 3, 2, 1 };
         switch (side)
@@ -171,7 +250,7 @@ public class CreateQuads : MonoBehaviour
         //Delete uncombined children
         foreach (Transform quad in transform)
         {
-            Destroy(quad);
+            Destroy(quad.gameObject);
         }
     }
 }
