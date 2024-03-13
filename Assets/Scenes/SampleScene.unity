@@ -350,13 +350,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1288008963}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ead5cb1342c60214c9db3027689c1533, type: 3}
+  m_Script: {fileID: 11500000, guid: 9183ef66f911f0a4e9a88caf92d6c5b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cubeMaterial: {fileID: 2100000, guid: ece34134065ce144496e23c91847ab14, type: 2}
-  xSize: 16
-  ySize: 16
-  zSize: 16
+  textureAtlas: {fileID: 2100000, guid: ece34134065ce144496e23c91847ab14, type: 2}
   blockTypeTable: {fileID: 11400000, guid: 79ac4f87eb5568444998f906a9341101, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
