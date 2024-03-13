@@ -5,10 +5,22 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Block type", menuName = "ScriptableObjects/Blocks", order = 1)]
 public class BlockTypeConfig : ScriptableObject
 {
-    public Sprite leftTexture;
-    public Sprite rightTexture;
-    public Sprite topTexture;
-    public Sprite bottomTexture;
-    public Sprite frontTexture;
-    public Sprite backTexture;
+    public BlockType BlockType;
+    
+    public Sprite LeftTexture;
+    public Sprite RightTexture;
+    public Sprite TopTexture;
+    public Sprite BottomTexture;
+    public Sprite FrontTexture;
+    public Sprite BackTexture;
+}
+
+public enum BlockType
+{
+    Grass,
+    Dirt,
+    Stone,
+    Lava,
+    Snow,
+    Air
 }

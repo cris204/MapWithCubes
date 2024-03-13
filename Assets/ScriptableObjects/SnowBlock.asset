@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c9406983fe7fd045a768ca8d34108e2, type: 3}
   m_Name: SnowBlock
   m_EditorClassIdentifier: 
-  leftTexture: {fileID: 0}
-  rightTexture: {fileID: 0}
-  topTexture: {fileID: 0}
-  bottomTexture: {fileID: 0}
-  frontTexture: {fileID: 0}
-  backTexture: {fileID: 0}
+  BlockType: 4
+  LeftTexture: {fileID: 3980781725656978636, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}
+  RightTexture: {fileID: 3980781725656978636, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}
+  TopTexture: {fileID: -8441353087957345369, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}
+  BottomTexture: {fileID: 1912781687795898200, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}
+  FrontTexture: {fileID: 3980781725656978636, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}
+  BackTexture: {fileID: 3980781725656978636, guid: cf2b41fa54d253a4187cf110519b07b7, type: 3}

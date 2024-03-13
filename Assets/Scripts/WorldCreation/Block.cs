@@ -3,12 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CreateQuads : MonoBehaviour
-{
-    [SerializeField] private Material cubeMat;
-    [SerializeField] private BlockType blockType;
-    [SerializeField] private BlockTypeConfig blockTypeConfig;
 
+public class Block
+{
     private enum CubSide
     {
         Bottom,
@@ -18,35 +15,69 @@ public class CreateQuads : MonoBehaviour
         Back,
         Front
     }
-    private enum BlockType
-    {
-        Grass,
-        Dirt,
-        Stone,
-        Lava,
-        Snow
-    }
+    
+    private Material cubeMat;
+    private BlockType blockType;
+    private BlockTypeConfig blockTypeConfig;
+    private Vector3 position;
+    private GameObject parent;
+    private bool isSolid;
+    private Chunk chunkOwner;
     
     Vector2[,] blockUVs = { 
-        /*Grass Top*/ {new Vector2( 0.125f, 0.375f ), new Vector2( 0.1875f, 0.375f),   new Vector2( 0.125f, 0.4375f ),new Vector2( 0.1875f, 0.4375f )},
+        /*Grass Top*/ {new Vector2( 0.75f, 0.1875f ), new Vector2( 0.8125f, 0.1875f),   new Vector2( 0.75f, 0.25f ),new Vector2( 0.8125f, 0.25f )},
         /*Grass Side*/{new Vector2( 0.1875f, 0.9375f ), new Vector2( 0.25f, 0.9375f),  new Vector2( 0.1875f, 1.0f ),new Vector2( 0.25f, 1.0f )},
         /*Dirt*/	  {new Vector2( 0.125f, 0.9375f ), new Vector2( 0.1875f, 0.9375f), new Vector2( 0.125f, 1.0f ),new Vector2( 0.1875f, 1.0f )},
         /*Stone*/	  {new Vector2( 0, 0.875f ), new Vector2( 0.0625f, 0.875f),  new Vector2( 0, 0.9375f ),new Vector2( 0.0625f, 0.9375f )},
         /*Lava*/	  {new Vector2( 0.875f, 0.0625f ), new Vector2( 0.9375f, 0.0625f), new Vector2( 0.875f, 0.125f ),new Vector2( 0.9375f, 0.125f )},
-        /*Snow Top*/	  {new Vector2( 0.125f, 0.6875f ), new Vector2( 0.1875f, 0.6875f), new Vector2( 0.125f, 0.75f ),new Vector2( 0.1875f, 0.75f )},
-        /*Snow Side*/	  {new Vector2( 0.25f, 0.6875f ), new Vector2( 0.3125f, 0.6875f), new Vector2( 0.25f, 0.75f ),new Vector2( 0.3125f, 0.75f )}
     };
 
-    private void Start()
+    public Block(BlockType blockType, Vector3 position, GameObject parent, Chunk chunkOwner, BlockTypeConfig blockTypeConfig)
     {
-        CreateQuad(CubSide.Front);
-        CreateQuad(CubSide.Bottom);
-        CreateQuad(CubSide.Top);
-        CreateQuad(CubSide.Right);
-        CreateQuad(CubSide.Left);
-        CreateQuad(CubSide.Back);
+        this.blockType = blockType;
+        this.position = position;
+        this.parent = parent;
+        isSolid = blockType != BlockType.Air;
+        this.chunkOwner = chunkOwner;
+        this.blockTypeConfig = blockTypeConfig;
+    }
+
+    public void Draw()
+    {
+        if (blockType == BlockType.Air)
+        {
+            return;
+        } 
         
-        CombineQuads();
+        if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z + 1))
+        {
+            CreateQuad(CubSide.Front);
+        }
+        
+        if(!HasSolidNeighbour((int)position.x,(int)position.y,(int)position.z - 1))
+        {
+            CreateQuad(CubSide.Back);
+        }
+        
+        if(!HasSolidNeighbour((int)position.x,(int)position.y + 1,(int)position.z))
+        {
+            CreateQuad(CubSide.Top);
+        }
+        
+        if(!HasSolidNeighbour((int)position.x,(int)position.y - 1,(int)position.z))
+        {
+            CreateQuad(CubSide.Bottom);
+        }
+        
+        if(!HasSolidNeighbour((int)position.x + 1,(int)position.y,(int)position.z))
+        {
+            CreateQuad(CubSide.Right);
+        }
+        if(!HasSolidNeighbour((int)position.x - 1,(int)position.y,(int)position.z))
+        {
+            CreateQuad(CubSide.Left);
+        }
+
     }
 
     private void CreateQuad(CubSide side)
@@ -99,29 +130,30 @@ public class CreateQuads : MonoBehaviour
                 uv01 = blockUVs[(int)blockType + 1, 2];
                 uv11 = blockUVs[(int)blockType + 1, 3];
             }
-        }else if (blockType == BlockType.Snow)
+        }
+        else if (blockType == BlockType.Snow)
         {
             // Order set by unity texture UVs
             if (side == CubSide.Top)
             {
-                uv01 = blockTypeConfig.topTexture.uv[0];
-                uv10 = blockTypeConfig.topTexture.uv[1];
-                uv11 = blockTypeConfig.topTexture.uv[2];
-                uv00 = blockTypeConfig.topTexture.uv[3];
+                uv01 = blockTypeConfig.TopTexture.uv[0];
+                uv10 = blockTypeConfig.TopTexture.uv[1];
+                uv11 = blockTypeConfig.TopTexture.uv[2];
+                uv00 = blockTypeConfig.TopTexture.uv[3];
             }
             else if (side == CubSide.Bottom)
             {
-                uv01 = blockTypeConfig.bottomTexture.uv[0];
-                uv10 = blockTypeConfig.bottomTexture.uv[1];
-                uv11 = blockTypeConfig.bottomTexture.uv[2];
-                uv00 = blockTypeConfig.bottomTexture.uv[3];
+                uv01 = blockTypeConfig.BottomTexture.uv[0];
+                uv10 = blockTypeConfig.BottomTexture.uv[1];
+                uv11 = blockTypeConfig.BottomTexture.uv[2];
+                uv00 = blockTypeConfig.BottomTexture.uv[3];
             }
             else 
             {
-                uv01 = blockTypeConfig.leftTexture.uv[0];
-                uv10 = blockTypeConfig.leftTexture.uv[1];
-                uv11 = blockTypeConfig.leftTexture.uv[2];
-                uv00 = blockTypeConfig.leftTexture.uv[3];
+                uv01 = blockTypeConfig.LeftTexture.uv[0];
+                uv10 = blockTypeConfig.LeftTexture.uv[1];
+                uv11 = blockTypeConfig.LeftTexture.uv[2];
+                uv00 = blockTypeConfig.LeftTexture.uv[3];
             }
         }
         else
@@ -215,42 +247,79 @@ public class CreateQuads : MonoBehaviour
         mesh.RecalculateBounds();
 
         GameObject quad = new GameObject($"quad_{side}");
-        quad.transform.parent = gameObject.transform;
+        quad.transform.position = position;
+        quad.transform.parent = parent.transform;
         MeshFilter meshFilter = (MeshFilter) quad.AddComponent(typeof(MeshFilter));
         meshFilter.mesh = mesh;
-        MeshRenderer meshRenderer = (MeshRenderer) quad.AddComponent(typeof(MeshRenderer));
-        meshRenderer.material = cubeMat;
+        
+
+        //This is using to see how is creating block by block but not required
+        // MeshRenderer meshRenderer = (MeshRenderer) quad.AddComponent(typeof(MeshRenderer));
+        // meshRenderer.material = cubeMat;
 
     }
 
-    private void CombineQuads()
+    private int ConvertBlockIndexToLocal(int value)
     {
-        // Combine children meshes
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combineInstances = new CombineInstance[meshFilters.Length];
-
-        int i = 0;
-
-        while (i < meshFilters.Length)
+        // If the value is -1 we are crossing to the neighbour and we will get the bigger index of neighbour chunk
+        if (value == -1)
         {
-            combineInstances[i].mesh = meshFilters[i].sharedMesh;
-            combineInstances[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            i++;
+            value = World.CHUNK_SIZE - 1;
+        }
+        // If the value is World.CHUNK_SIZE we are in the limit of the chunk, so we need to get the index 0 from next chunk
+        else if (value == World.CHUNK_SIZE)
+        {
+            value = 0;
         }
 
-        // Create a new mesh and add combined mesh
-        MeshFilter meshFilter = (MeshFilter)gameObject.AddComponent(typeof(MeshFilter));
-        meshFilter.mesh = new Mesh();
-        meshFilter.mesh.CombineMeshes(combineInstances);
-        
-        //Create renderer
-        MeshRenderer meshRenderer = (MeshRenderer)gameObject.AddComponent(typeof(MeshRenderer));
-        meshRenderer.material = cubeMat;
-        
-        //Delete uncombined children
-        foreach (Transform quad in transform)
-        {
-            Destroy(quad.gameObject);
-        }
+        return value;
     }
+
+    public bool HasSolidNeighbour(int x, int y, int z)
+    {
+        Block[,,] chunks;
+        
+        if (x < 0 || x >= World.CHUNK_SIZE ||
+            y < 0 || y >= World.CHUNK_SIZE ||
+            z < 0 || z >= World.CHUNK_SIZE)
+        {
+            Vector3 neighbourChunkPos = parent.transform.position + new Vector3(
+                                            (x - (int)position.x) * World.CHUNK_SIZE,
+                                            (y - (int)position.y) * World.CHUNK_SIZE,
+                                            (z - (int)position.z) * World.CHUNK_SIZE);
+
+            string neighbourChunkName = World.BuildChunkName(neighbourChunkPos);
+
+            x = ConvertBlockIndexToLocal(x);
+            y = ConvertBlockIndexToLocal(y);
+            z = ConvertBlockIndexToLocal(z);
+
+            Chunk neighbourChunk;
+
+            if (World.WORLD_CHUNKS.TryGetValue(neighbourChunkName, out neighbourChunk))
+            {
+                chunks = neighbourChunk.ChunkData;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+        else
+        {
+            chunks = chunkOwner.ChunkData;
+        }
+        
+        // Other way is calculating if the min and max is inside chunk limits (X >= Chunk X limit) { Return false }
+        try
+        {
+            return chunks[x, y, z].isSolid;
+        }
+        catch(IndexOutOfRangeException ex){}
+
+        return false;
+
+    }
+    
 }
